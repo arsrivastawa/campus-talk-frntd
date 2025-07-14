@@ -33,7 +33,7 @@ export const useWebRTC = ({
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const socket = useSocket("http://localhost:3001");
+  const socket = useSocket("https://campus-talk-bcknd.onrender.com");
 
   
   const initializePeerConnection = useCallback(() => {

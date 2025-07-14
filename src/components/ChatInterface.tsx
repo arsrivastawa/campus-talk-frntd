@@ -31,7 +31,7 @@ const ChatInterface = ({ onDisconnect, onFindNew }: ChatInterfaceProps) => {
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  const socket = useSocket("http://localhost:3001")
+  const socket = useSocket("https://campus-talk-bcknd.onrender.com")
 
   useEffect(() => {
     if (!socket) return
