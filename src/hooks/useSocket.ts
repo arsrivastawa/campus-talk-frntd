@@ -18,6 +18,7 @@ interface ServerToClientEvents {
   "ice-candidate": (data: { from: string; candidate: RTCIceCandidateInit }) => void
   "call-ended": () => void
   "peer-disconnected": () => void
+  "peer-wants-find-new": () => void
 }
 
 interface ClientToServerEvents {
@@ -30,6 +31,8 @@ interface ClientToServerEvents {
   "ice-candidate": (data: { candidate: RTCIceCandidateInit }) => void
   "end-call": () => void
   disconnect: () => void
+  "peer-confirm-find-new":() => void
+
 }
 
 export const useSocket = (serverUrl: string): Socket<ServerToClientEvents, ClientToServerEvents> | null => {

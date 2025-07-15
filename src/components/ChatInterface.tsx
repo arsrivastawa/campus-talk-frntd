@@ -15,7 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSocket } from "@/hooks/useSocket";
-import config from "@/config/config.js"
+import config from "@/config/config.js";
 
 interface Message {
   id: string;
@@ -26,12 +26,11 @@ interface Message {
 
 interface ChatInterfaceProps {
   onDisconnect: () => void;
-  onFindNew: () => void;
 }
 
 type ConnectionStatus = "connecting" | "connected" | "disconnected" | "waiting";
 
-const ChatInterface = ({ onDisconnect, onFindNew }: ChatInterfaceProps) => {
+const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
   const [connectionStatus, setConnectionStatus] =
@@ -93,6 +92,19 @@ const ChatInterface = ({ onDisconnect, onFindNew }: ChatInterfaceProps) => {
           timestamp: new Date(),
         },
       ]);
+      setTimeout(() => {
+        socket.emit("find-new");
+        setMessages([]);
+        setConnectionStatus("connecting");
+      }, 1000);
+    });
+
+    socket.on("peer-wants-find-new", () => {
+      // maybe automatically agree or show a "Find New?" button
+      setConnectionStatus("connecting");
+      setMessages([]);
+      setOtherUser(null);
+      socket.emit("peer-confirm-find-new");
     });
 
     socket.on("typing", () => {
@@ -154,7 +166,6 @@ const ChatInterface = ({ onDisconnect, onFindNew }: ChatInterfaceProps) => {
       setMessages([]);
       setConnectionStatus("connecting");
       setOtherUser(null);
-      onFindNew();
     }
   };
 

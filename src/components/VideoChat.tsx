@@ -20,7 +20,6 @@ import { useWebRTC } from "@/hooks/useWebRTC";
 
 interface VideoChatProps {
   onDisconnect: () => void;
-  onFindNew: () => void;
 }
 
 interface Message {
@@ -30,7 +29,7 @@ interface Message {
   timestamp: Date;
 }
 
-const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
+const VideoChat = ({ onDisconnect }: VideoChatProps) => {
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -155,7 +154,6 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
       setMessages([]);
       setOtherUser(null);
     }
-    onFindNew();
   };
 
   const handleSendMessage = () => {

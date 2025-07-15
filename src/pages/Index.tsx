@@ -25,19 +25,8 @@ const Index = () => {
   };
 
   const handleDisconnect = () => {
+    alert("You have been disconnected from the chat.");
     setAppState("landing");
-  };
-
-  const handleFindNew = () => {
-    // For now, we'll simulate finding a new person by reloading the chat
-    setAppState("mode-selection");
-    setTimeout(() => {
-      if (chatMode === "text") {
-        setAppState("text-chat");
-      } else {
-        setAppState("video-chat");
-      }
-    }, 500);
   };
 
   const handleBackToLanding = () => {
@@ -58,12 +47,11 @@ const Index = () => {
       {appState === "text-chat" && (
         <ChatInterface
           onDisconnect={handleDisconnect}
-          onFindNew={handleFindNew}
         />
       )}
 
       {appState === "video-chat" && (
-        <VideoChat onDisconnect={handleDisconnect} onFindNew={handleFindNew} />
+        <VideoChat onDisconnect={handleDisconnect}/>
       )}
     </div>
   );
