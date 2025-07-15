@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback, useEffect } from "react";
 import { useSocket } from "./useSocket";
+import config from "../config/config.js";
 
 interface UseWebRTCProps {
   onRemoteStream?: (stream: MediaStream) => void;
@@ -33,7 +34,7 @@ export const useWebRTC = ({
   const peerConnection = useRef<RTCPeerConnection | null>(null);
   const localVideoRef = useRef<HTMLVideoElement>(null);
   const remoteVideoRef = useRef<HTMLVideoElement>(null);
-  const socket = useSocket("https://campus-talk-bcknd.onrender.com");
+  const socket = useSocket(config.SERVER_URL);
 
   
   const initializePeerConnection = useCallback(() => {
@@ -58,11 +59,6 @@ export const useWebRTC = ({
       const [stream] = event.streams;
       setRemoteStream(stream);
 
-      
-      if (remoteVideoRef.current) {
-        remoteVideoRef.current.srcObject = stream;
-        remoteVideoRef.current.play().catch(console.error);
-      }
       onRemoteStream?.(stream);
     };
 
@@ -110,6 +106,7 @@ export const useWebRTC = ({
     if (remoteVideoRef.current) {
       remoteVideoRef.current.srcObject = null;
     }
+    socket.emit("find-new")
   }, []);
 
   

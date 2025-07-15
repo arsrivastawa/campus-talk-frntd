@@ -1,35 +1,47 @@
-"use client"
+"use client";
 
-import type React from "react"
+import type React from "react";
 
-import { useState, useEffect, useRef } from "react"
-import { Mic, MicOff, Video, VideoOff, Phone, MessageSquare, Send } from "lucide-react"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { AspectRatio } from "@/components/ui/aspect-ratio"
-import { useWebRTC } from "@/hooks/useWebRTC"
+import { useState, useEffect, useRef } from "react";
+import {
+  Mic,
+  MicOff,
+  Video,
+  VideoOff,
+  Phone,
+  MessageSquare,
+  Send,
+  Loader,
+} from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { useWebRTC } from "@/hooks/useWebRTC";
 
 interface VideoChatProps {
-  onDisconnect: () => void
-  onFindNew: () => void
+  onDisconnect: () => void;
+  onFindNew: () => void;
 }
 
 interface Message {
-  id: string
-  text: string
-  sender: "me" | "other"
-  timestamp: Date
+  id: string;
+  text: string;
+  sender: "me" | "other";
+  timestamp: Date;
 }
 
 const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
-  const [permissionError, setPermissionError] = useState<string | null>(null)
-  const [showChat, setShowChat] = useState(false)
-  const [messages, setMessages] = useState<Message[]>([])
-  const [inputMessage, setInputMessage] = useState("")
-  const [isTyping, setIsTyping] = useState(false)
-  const [otherUser, setOtherUser] = useState<{ id: string; name: string } | null>(null)
-  const [mediaInitialized, setMediaInitialized] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
+  const [permissionError, setPermissionError] = useState<string | null>(null);
+  const [showChat, setShowChat] = useState(false);
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [inputMessage, setInputMessage] = useState("");
+  const [isTyping, setIsTyping] = useState(false);
+  const [otherUser, setOtherUser] = useState<{
+    id: string;
+    name: string;
+  } | null>(null);
+  const [mediaInitialized, setMediaInitialized] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const {
     localStream,
@@ -45,38 +57,38 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
     stopMedia,
     isMatched,
     socket,
-    startWebRTCConnection, 
+    startWebRTCConnection,
     currentUserId,
     isMediaReady,
-    setIsMediaReady
-  } = useWebRTC()
+    setIsMediaReady,
+  } = useWebRTC();
 
-  
   useEffect(() => {
-    if (mediaInitialized) return
+    if (mediaInitialized) return;
 
     const initializeMedia = async () => {
       try {
-        await getUserMedia(true, true)
-        setIsMediaReady(true)
-        setMediaInitialized(true)
+        await getUserMedia(true, true);
+        setIsMediaReady(true);
+        setMediaInitialized(true);
       } catch (err) {
-        setPermissionError("Please allow camera and microphone access to use video chat")
+        setPermissionError(
+          "Please allow camera and microphone access to use video chat"
+        );
       }
-    }
+    };
 
-    initializeMedia()
-  }, [mediaInitialized, getUserMedia])
+    initializeMedia();
+  }, [mediaInitialized, getUserMedia]);
 
-  
   useEffect(() => {
-    if (!socket) return
+    if (!socket) return;
 
     const handleMatched = (data: any) => {
-      setOtherUser(data.otherUser)
+      setOtherUser(data.otherUser);
 
-      startWebRTCConnection(data)
-    }
+      startWebRTCConnection(data);
+    };
 
     const handleMessage = (message: any) => {
       const newMessage: Message = {
@@ -84,17 +96,17 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
         text: message.text,
         sender: "other",
         timestamp: new Date(),
-      }
-      setMessages((prev) => [...prev, newMessage])
-    }
+      };
+      setMessages((prev) => [...prev, newMessage]);
+    };
 
     const handleTyping = () => {
-      setIsTyping(true)
-      setTimeout(() => setIsTyping(false), 3000)
-    }
+      setIsTyping(true);
+      setTimeout(() => setIsTyping(false), 3000);
+    };
 
     const handleUserDisconnected = () => {
-      setOtherUser(null)
+      setOtherUser(null);
       setMessages((prev) => [
         ...prev,
         {
@@ -103,80 +115,77 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
           sender: "other",
           timestamp: new Date(),
         },
-      ])
-    }
+      ]);
+    };
 
-    
-    socket.on("matched", handleMatched)
-    socket.on("message", handleMessage)
-    socket.on("typing", handleTyping)
-    socket.on("user-disconnected", handleUserDisconnected)
+    socket.on("matched", handleMatched);
+    socket.on("message", handleMessage);
+    socket.on("typing", handleTyping);
+    socket.on("user-disconnected", handleUserDisconnected);
 
     return () => {
-      socket.off("matched", handleMatched)
-      socket.off("message", handleMessage)
-      socket.off("typing", handleTyping)
-      socket.off("user-disconnected", handleUserDisconnected)
-    }
-  }, [localStream, socket, startWebRTCConnection])
+      socket.off("matched", handleMatched);
+      socket.off("message", handleMessage);
+      socket.off("typing", handleTyping);
+      socket.off("user-disconnected", handleUserDisconnected);
+    };
+  }, [localStream, socket, startWebRTCConnection]);
 
-  
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
-  
   useEffect(() => {
     return () => {
-      stopMedia()
-    }
-  }, []) 
+      stopMedia();
+    };
+  }, []);
 
   const handleDisconnect = () => {
     if (socket) {
-      socket.emit("end-call")
+      socket.emit("end-call");
     }
-    stopMedia()
-    onDisconnect()
-  }
+    stopMedia();
+    onDisconnect();
+  };
 
   const handleFindNew = () => {
     if (socket) {
-      socket.emit("find-new")
-      setMessages([])
-      setOtherUser(null)
+      socket.emit("find-new");
+      setMessages([]);
+      setOtherUser(null);
     }
-    onFindNew()
-  }
+    onFindNew();
+  };
 
   const handleSendMessage = () => {
-    if (!inputMessage.trim() || !socket || !isMatched) return
+    if (!inputMessage.trim() || !socket || !isMatched) return;
 
     const newMessage: Message = {
       id: Date.now().toString(),
       text: inputMessage,
       sender: "me",
       timestamp: new Date(),
-    }
+    };
 
-    setMessages((prev) => [...prev, newMessage])
-    socket.emit("send-message", { text: inputMessage })
-    setInputMessage("")
-  }
+    setMessages((prev) => [...prev, newMessage]);
+    socket.emit("send-message", { text: inputMessage });
+    setInputMessage("");
+  };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      handleSendMessage()
+      e.preventDefault();
+      handleSendMessage();
     }
-  }
+  };
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setInputMessage(e.target.value)
+    setInputMessage(e.target.value);
     if (socket && isMatched) {
-      socket.emit("typing")
+      socket.emit("typing");
     }
-  }
+  };
 
   if (permissionError) {
     return (
@@ -185,19 +194,28 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
           <div className="text-red-500 mb-4">
             <VideoOff className="w-16 h-16 mx-auto" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-800">Camera Access Required</h2>
+          <h2 className="text-xl font-semibold text-gray-800">
+            Camera Access Required
+          </h2>
           <p className="text-gray-600">{permissionError}</p>
           <div className="space-y-3">
-            <Button onClick={() => window.location.reload()} className="w-full bg-blue-500 hover:bg-blue-600">
+            <Button
+              onClick={() => window.location.reload()}
+              className="w-full bg-blue-500 hover:bg-blue-600"
+            >
               Try Again
             </Button>
-            <Button onClick={onDisconnect} variant="outline" className="w-full bg-transparent">
+            <Button
+              onClick={onDisconnect}
+              variant="outline"
+              className="w-full bg-transparent"
+            >
               Back to Home
             </Button>
           </div>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -210,13 +228,23 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
               <Video className="w-6 h-6 text-white" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-gray-800">CampusTalk Video</h1>
+              <h1 className="text-xl font-bold text-gray-800">
+                CampusTalk Video
+              </h1>
               <p className="text-sm text-gray-600">
-                {isConnected
-                  ? `🟢 Video connected with ${otherUser?.name || "someone"}`
-                  : isMatched
-                    ? `🟡 Setting up video call with ${otherUser?.name || "someone"}...`
-                    : "🔍 Finding someone to video chat with..."}
+                {isConnected ? (
+                  `Video connected with ${otherUser?.name || "someone"}`
+                ) : isMatched ? (
+                  <div className="flex items-center space-x-2">
+                    <Loader className="w-4 h-4 animate-spin text-yellow-500" />
+                    <p className="">
+                      Setting up video call with{" "}
+                      {`${otherUser?.name || "someone"}`}...
+                    </p>
+                  </div>
+                ) : (
+                  "🔍 Finding someone to video chat with..."
+                )}
               </p>
             </div>
           </div>
@@ -226,7 +254,11 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
               variant="outline"
               size="sm"
               onClick={() => setShowChat(!showChat)}
-              className={`hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 ${showChat ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-transparent"}`}
+              className={`hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 ${
+                showChat
+                  ? "bg-blue-50 text-blue-600 border-blue-200"
+                  : "bg-transparent"
+              }`}
             >
               <MessageSquare className="w-4 h-4 mr-1" />
               Chat
@@ -259,7 +291,12 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
           <div className="w-full max-w-2xl">
             <AspectRatio ratio={16 / 9}>
               <div className="relative bg-gray-900 rounded-2xl overflow-hidden shadow-xl h-full">
-                <video ref={remoteVideoRef} autoPlay playsInline className="w-full h-full object-cover" />
+                <video
+                  ref={remoteVideoRef}
+                  autoPlay
+                  playsInline
+                  className="w-full h-full object-cover"
+                />
                 {!remoteStream && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
                     <div className="text-center text-white">
@@ -268,10 +305,16 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
                       </div>
                       <p className="text-lg">
                         {isMatched
-                          ? `Connecting video with ${otherUser?.name || "other person"}...`
+                          ? `Connecting video with ${
+                              otherUser?.name || "other person"
+                            }...`
                           : "Waiting for other person..."}
                       </p>
-                      {isMatched && <p className="text-sm text-gray-300 mt-2">Setting up peer-to-peer connection...</p>}
+                      {isMatched && (
+                        <p className="text-sm text-gray-300 mt-2">
+                          Setting up peer-to-peer connection...
+                        </p>
+                      )}
                     </div>
                   </div>
                 )}
@@ -297,7 +340,7 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
                   playsInline
                   muted
                   className="w-full h-full object-cover"
-                  style={{ transform: "scaleX(-1)" }} 
+                  style={{ transform: "scaleX(-1)" }}
                 />
                 {!isMediaReady && (
                   <div className="absolute inset-0 flex items-center justify-center bg-gray-800">
@@ -309,7 +352,9 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
                     </div>
                   </div>
                 )}
-                <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-lg text-sm">You</div>
+                <div className="absolute top-4 left-4 bg-black/50 text-white px-3 py-1 rounded-lg text-sm">
+                  You
+                </div>
               </div>
             </AspectRatio>
           </div>
@@ -320,10 +365,16 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
               <Button
                 onClick={toggleMicrophone}
                 size="lg"
-                variant={mediaPermissions.microphone ? "default" : "destructive"}
+                variant={
+                  mediaPermissions.microphone ? "default" : "destructive"
+                }
                 className="rounded-full w-14 h-14 p-0"
               >
-                {mediaPermissions.microphone ? <Mic className="w-6 h-6" /> : <MicOff className="w-6 h-6" />}
+                {mediaPermissions.microphone ? (
+                  <Mic className="w-6 h-6" />
+                ) : (
+                  <MicOff className="w-6 h-6" />
+                )}
               </Button>
 
               <Button
@@ -332,10 +383,19 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
                 variant={mediaPermissions.camera ? "default" : "destructive"}
                 className="rounded-full w-14 h-14 p-0"
               >
-                {mediaPermissions.camera ? <Video className="w-6 h-6" /> : <VideoOff className="w-6 h-6" />}
+                {mediaPermissions.camera ? (
+                  <Video className="w-6 h-6" />
+                ) : (
+                  <VideoOff className="w-6 h-6" />
+                )}
               </Button>
 
-              <Button onClick={handleDisconnect} size="lg" variant="destructive" className="rounded-full w-14 h-14 p-0">
+              <Button
+                onClick={handleDisconnect}
+                size="lg"
+                variant="destructive"
+                className="rounded-full w-14 h-14 p-0"
+              >
                 <Phone className="w-6 h-6" />
               </Button>
             </div>
@@ -363,7 +423,9 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
                 messages.map((message) => (
                   <div
                     key={message.id}
-                    className={`flex ${message.sender === "me" ? "justify-end" : "justify-start"} animate-fade-in`}
+                    className={`flex ${
+                      message.sender === "me" ? "justify-end" : "justify-start"
+                    } animate-fade-in`}
                   >
                     <div
                       className={`max-w-xs px-3 py-2 rounded-2xl shadow-sm text-sm ${
@@ -373,8 +435,17 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
                       }`}
                     >
                       <p>{message.text}</p>
-                      <p className={`text-xs mt-1 ${message.sender === "me" ? "text-blue-100" : "text-gray-500"}`}>
-                        {message.timestamp.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                      <p
+                        className={`text-xs mt-1 ${
+                          message.sender === "me"
+                            ? "text-blue-100"
+                            : "text-gray-500"
+                        }`}
+                      >
+                        {message.timestamp.toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
                       </p>
                     </div>
                   </div>
@@ -428,10 +499,12 @@ const VideoChat = ({ onDisconnect, onFindNew }: VideoChatProps) => {
       </div>
 
       {error && (
-        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mx-4 mb-4">Error: {error}</div>
+        <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded mx-4 mb-4">
+          Error: {error}
+        </div>
       )}
     </div>
-  )
-}
+  );
+};
 
-export default VideoChat
+export default VideoChat;
