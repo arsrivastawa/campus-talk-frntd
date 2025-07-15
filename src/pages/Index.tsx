@@ -3,6 +3,7 @@ import LandingPage from "@/components/LandingPage";
 import ModeSelection from "@/components/ModeSelection";
 import ChatInterface from "@/components/ChatInterface";
 import VideoChat from "@/components/VideoChat";
+import { toast } from "sonner";
 
 type AppState = "landing" | "mode-selection" | "text-chat" | "video-chat";
 type ChatMode = "text" | "video";
@@ -25,7 +26,7 @@ const Index = () => {
   };
 
   const handleDisconnect = () => {
-    alert("You have been disconnected from the chat.");
+    toast.success("Disconnected from chat", { position: "top-center",style: { backgroundColor: "#f0f0f0", color: "#2563eb" } });
     setAppState("landing");
   };
 

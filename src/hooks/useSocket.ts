@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react"
 import { io, type Socket } from "socket.io-client"
+import { toast } from "sonner"
 
 interface ServerToClientEvents {
   connected: () => void
@@ -57,7 +58,7 @@ export const useSocket = (serverUrl: string): Socket<ServerToClientEvents, Clien
     })
 
     newSocket.on("room-full", () => {
-      alert("This chat room is full. Only 2 users are allowed.")
+      toast.warning("This chat room is full. Only 2 users are allowed.",{position: "top-center"})
       window.location.reload()
     })
 

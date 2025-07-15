@@ -12,6 +12,7 @@ import {
   MessageSquare,
   Send,
   Loader,
+  ArrowLeftIcon,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -29,7 +30,12 @@ interface Message {
   timestamp: Date;
 }
 
+type ConnectionStatus = "connecting" | "connected" | "disconnected" | "waiting";
+
 const VideoChat = ({ onDisconnect }: VideoChatProps) => {
+  const [connectionStatus, setConnectionStatus] =
+    useState<ConnectionStatus>("connecting");
+
   const [permissionError, setPermissionError] = useState<string | null>(null);
   const [showChat, setShowChat] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
@@ -85,7 +91,7 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
 
     const handleMatched = (data: any) => {
       setOtherUser(data.otherUser);
-
+      setConnectionStatus("connected");
       startWebRTCConnection(data);
     };
 
@@ -105,6 +111,7 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
     };
 
     const handleUserDisconnected = () => {
+      setConnectionStatus("disconnected");
       setOtherUser(null);
       setMessages((prev) => [
         ...prev,
@@ -115,7 +122,20 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
           timestamp: new Date(),
         },
       ]);
+
+      setTimeout(() => {
+        socket.emit("find-new");
+        setMessages([]);
+        setConnectionStatus("connecting");
+      }, 1000);
     };
+
+    socket.on("peer-wants-find-new", () => {
+      setConnectionStatus("connecting");
+      setMessages([]);
+      setOtherUser(null);
+      socket.emit("peer-confirm-find-new");
+    });
 
     socket.on("matched", handleMatched);
     socket.on("message", handleMessage);
@@ -251,6 +271,7 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
             <Button
               variant="outline"
               size="sm"
+              disabled={!isMatched}
               onClick={() => setShowChat(!showChat)}
               className={`hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 ${
                 showChat
@@ -267,12 +288,21 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
               onClick={handleDisconnect}
               className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 bg-transparent"
             >
-              <Phone className="w-4 h-4 mr-1" />
-              End Call
+              {connectionStatus === "disconnected" ? (
+                <ArrowLeftIcon />
+              ) : (
+                <Phone className="w-4 h-4 mr-1" />
+              )}
+              {connectionStatus === "disconnected"
+                ? "Back to Home"
+                : connectionStatus === "connecting"
+                ? "Cancel"
+                : "Disconnect"}
             </Button>
             <Button
               variant="outline"
               size="sm"
+              disabled={!isMatched}
               onClick={handleFindNew}
               className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 bg-transparent"
             >

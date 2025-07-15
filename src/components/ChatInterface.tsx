@@ -100,7 +100,6 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
     });
 
     socket.on("peer-wants-find-new", () => {
-      // maybe automatically agree or show a "Find New?" button
       setConnectionStatus("connecting");
       setMessages([]);
       setOtherUser(null);
