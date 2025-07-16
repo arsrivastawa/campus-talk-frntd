@@ -16,6 +16,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSocket } from "@/hooks/useSocket";
 import config from "@/config/config.js";
+import { toast } from "sonner";
 
 interface Message {
   id: string;
@@ -32,6 +33,7 @@ type ConnectionStatus = "connecting" | "connected" | "disconnected" | "waiting";
 
 const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [hasMatched, setHasMatched] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const [connectionStatus, setConnectionStatus] =
     useState<ConnectionStatus>("connecting");
@@ -58,9 +60,27 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
     });
 
     socket.on("matched", (data) => {
+      if (hasMatched) return;
+      setHasMatched(true);
       setOtherUser(data.otherUser);
       setConnectionStatus("connected");
-
+      setTimeout(() => {
+        if (data.icebreaker) {
+          toast.info(`Icebreaker for you:`, {
+            description: data.icebreaker,
+            descriptionClassName: "text-black",
+            duration: 8000,
+            dismissible: true,
+            position: "top-center",
+            style: {
+              fontSize: "1rem",
+              backgroundColor: "#f0f0f0",
+              color: "#2563eb",
+            },
+            className: "font-semibold shadow-lg",
+          });
+        }
+      }, 5000);
       const welcomeMessage: Message = {
         id: Date.now().toString(),
         text: `You are now connected with ${data.otherUser.name}! 👋`,
@@ -82,6 +102,7 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
 
     socket.on("user-disconnected", () => {
       setConnectionStatus("disconnected");
+      setHasMatched(false);
       setOtherUser(null);
       setMessages((prev) => [
         ...prev,
@@ -162,6 +183,7 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
   const handleFindNew = () => {
     if (socket) {
       socket.emit("find-new");
+      setHasMatched(false);
       setMessages([]);
       setConnectionStatus("connecting");
       setOtherUser(null);
@@ -228,7 +250,6 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
               variant="outline"
               size="sm"
               onClick={onDisconnect}
-              // disabled={connectionStatus === "connecting"}
               className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 bg-transparent"
             >
               {connectionStatus === "disconnected" ? (

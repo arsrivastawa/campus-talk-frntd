@@ -7,7 +7,7 @@ import { toast } from "sonner"
 interface ServerToClientEvents {
   connected: () => void
   disconnected: () => void
-  matched: (data: { roomId: string; otherUser: { id: string; name: string } }) => void
+  matched: (data: { roomId: string; otherUser: { id: string; name: string }; icebreaker: string }) => void
   "user-joined": (user: { id: string; name: string }) => void
   "user-left": (user: { id: string; name: string }) => void
   "user-disconnected": () => void

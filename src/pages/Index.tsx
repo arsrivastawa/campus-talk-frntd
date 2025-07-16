@@ -26,7 +26,11 @@ const Index = () => {
   };
 
   const handleDisconnect = () => {
-    toast.success("Disconnected from chat", { position: "top-center",style: { backgroundColor: "#f0f0f0", color: "#2563eb" } });
+    toast.success("Disconnected from chat", {
+      dismissible: true,
+      position: "top-center",
+      style: { backgroundColor: "#f0f0f0", color: "#2563eb" },
+    });
     setAppState("landing");
   };
 
@@ -46,13 +50,11 @@ const Index = () => {
       )}
 
       {appState === "text-chat" && (
-        <ChatInterface
-          onDisconnect={handleDisconnect}
-        />
+        <ChatInterface onDisconnect={handleDisconnect} />
       )}
 
       {appState === "video-chat" && (
-        <VideoChat onDisconnect={handleDisconnect}/>
+        <VideoChat onDisconnect={handleDisconnect} />
       )}
     </div>
   );
