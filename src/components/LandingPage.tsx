@@ -1,6 +1,6 @@
-
-import { MessageCircle, Users, Heart } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { MessageCircle, Users, Heart, Sparkles } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import config from "@/config/config";
 
 interface LandingPageProps {
   onStartChat: () => void;
@@ -18,52 +18,57 @@ const LandingPage = ({ onStartChat }: LandingPageProps) => {
             </div>
           </div>
           <h1 className="text-5xl font-bold bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent">
-            CampusTalk
+            {config.APP_NAME}
           </h1>
           <p className="text-xl text-gray-600 font-medium">
-            Chat and connect with fellow college mates!
+            Because Boring Is Too Predictable!
           </p>
         </div>
 
         {/* Welcome Message */}
         <div className="bg-white/70 backdrop-blur-sm rounded-2xl p-8 shadow-xl border border-white/20">
           <h2 className="text-2xl font-semibold text-gray-800 mb-4">
-            Welcome to CampusTalk 🎓
+            Welcome to {config.APP_NAME}
           </h2>
           <p className="text-gray-600 leading-relaxed mb-6">
-            Perfect for freshers and college students! Connect anonymously with fellow students, 
-            break the ice, and make new friends on campus. Get randomly matched for one-on-one 
-            conversations and discover your college community.
+            Tired of dry chats and dead apps? Jump in, get a surprise question,
+            and talk to someone new every time.
           </p>
-          
+
           {/* Features */}
           <div className="grid md:grid-cols-3 gap-4 mb-8">
             <div className="flex flex-col items-center p-4 bg-blue-50 rounded-xl">
               <Users className="w-8 h-8 text-blue-500 mb-2" />
-              <span className="text-sm font-medium text-blue-700">Random Matching</span>
+              <span className="text-sm font-medium text-blue-700">
+                Random Matching
+              </span>
             </div>
             <div className="flex flex-col items-center p-4 bg-purple-50 rounded-xl">
               <MessageCircle className="w-8 h-8 text-purple-500 mb-2" />
-              <span className="text-sm font-medium text-purple-700">Anonymous Chat</span>
+              <span className="text-sm font-medium text-purple-700">
+                Anonymous Chat
+              </span>
             </div>
             <div className="flex flex-col items-center p-4 bg-green-50 rounded-xl">
-              <Heart className="w-8 h-8 text-green-500 mb-2" />
-              <span className="text-sm font-medium text-green-700">Campus Bonding</span>
+              <Sparkles className="w-8 h-8 text-green-500 mb-2" />
+              <span className="text-sm font-medium text-green-700">
+                Fun Icebreakers
+              </span>
             </div>
           </div>
 
-          <Button 
+          <Button
             onClick={onStartChat}
             size="lg"
             className="bg-gradient-to-r from-blue-500 to-purple-600 hover:from-blue-600 hover:to-purple-700 text-white font-semibold py-4 px-8 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-105"
           >
-            Start Chatting 🚀
+            Start Chatting
           </Button>
         </div>
 
         {/* Footer */}
         <p className="text-sm text-gray-500">
-          Safe, anonymous, and perfect for campus connections
+          Safe, anonymous, and always unexpected
         </p>
       </div>
     </div>

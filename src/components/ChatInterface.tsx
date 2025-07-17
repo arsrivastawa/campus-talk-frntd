@@ -11,7 +11,11 @@ import {
   Loader,
   ArrowLeftFromLine,
   ArrowLeftIcon,
+  Smile,
+  SmileIcon,
 } from "lucide-react";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useSocket } from "@/hooks/useSocket";
@@ -33,6 +37,7 @@ type ConnectionStatus = "connecting" | "connected" | "disconnected" | "waiting";
 
 const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [emojiPickerVisible, setEmojiPickerVisible] = useState(false);
   const [hasMatched, setHasMatched] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
   const [connectionStatus, setConnectionStatus] =
@@ -173,6 +178,18 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
     }
   };
 
+  function addEmoji(emoji: { native: string }) {
+    setInputMessage((prev) => prev + emoji.native);
+    setEmojiPickerVisible(false);
+  }
+
+  const handleEmojiPicker = () => {
+    setEmojiPickerVisible(true);
+    if (emojiPickerVisible) {
+      inputRef.current?.focus();
+    }
+  };
+
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setInputMessage(e.target.value);
     if (socket && connectionStatus === "connected") {
@@ -193,7 +210,7 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
   const getStatusText = () => {
     switch (connectionStatus) {
       case "connecting":
-        return "Connecting to a fellow student...";
+        return "Looking for someone to vibe with…";
       case "connected":
         return `You are now chatting with ${
           otherUser?.name || "a college mate"
@@ -232,7 +249,7 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-800">
-                CampusTalk Text
+                {config.APP_NAME} Text
               </h1>
               <div className="flex items-center space-x-2">
                 {connectionStatus === "connecting" && (
@@ -365,8 +382,27 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
 
           {/* Input Area */}
           {connectionStatus === "connected" && (
-            <div className="border-t border-gray-200 p-4">
+            <div className="border-t border-gray-200 p-4 relative">
+              <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-blue-500 to-purple-600"></div>
               <div className="flex space-x-2">
+                {emojiPickerVisible && (
+                  <div className="absolute bottom-14 left-0 z-50">
+                    <Picker
+                      data={data}
+                      onClickOutside={() => setEmojiPickerVisible(false)}
+                      onEmojiSelect={addEmoji}
+                    />
+                  </div>
+                )}
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEmojiPicker();
+                  }}
+                  className="bg-white text-gray-600 shadow-md hover:bg-gray-100 px-4 rounded-xl"
+                >
+                  <SmileIcon size={5} className="w-4 h-4" />
+                </Button>
                 <Input
                   ref={inputRef}
                   value={inputMessage}

@@ -18,6 +18,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useWebRTC } from "@/hooks/useWebRTC";
+import config from "@/config/config"
 
 interface VideoChatProps {
   onDisconnect: () => void;
@@ -247,7 +248,7 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
             </div>
             <div>
               <h1 className="text-xl font-bold text-gray-800">
-                CampusTalk Video
+                {config.APP_NAME} Video
               </h1>
               <p className="text-sm text-gray-600">
                 {isConnected ? (
@@ -261,7 +262,7 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
                     </p>
                   </div>
                 ) : (
-                  "🔍 Finding someone to video chat with..."
+                  "Finding someone to video chat with..."
                 )}
               </p>
             </div>

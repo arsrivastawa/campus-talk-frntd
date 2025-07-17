@@ -22,7 +22,7 @@ const ModeSelection = ({ onModeSelect, onBack }: ModeSelectionProps) => {
             Choose Your Chat Mode
           </h1>
           <p className="text-lg text-gray-600">
-            How would you like to connect with fellow students?
+            How would you like to connect with the others?
           </p>
         </div>
 
