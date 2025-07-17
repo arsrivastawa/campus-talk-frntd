@@ -13,6 +13,7 @@ import {
   ArrowLeftIcon,
   Smile,
   SmileIcon,
+  Menu,
 } from "lucide-react";
 import data from "@emoji-mart/data";
 import Picker from "@emoji-mart/react";
@@ -21,6 +22,7 @@ import { Input } from "@/components/ui/input";
 import { useSocket } from "@/hooks/useSocket";
 import config from "@/config/config.js";
 import { toast } from "sonner";
+import "../App.css";
 
 interface Message {
   id: string;
@@ -37,6 +39,7 @@ type ConnectionStatus = "connecting" | "connected" | "disconnected" | "waiting";
 
 const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
   const [messages, setMessages] = useState<Message[]>([]);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const [emojiPickerVisible, setEmojiPickerVisible] = useState(false);
   const [hasMatched, setHasMatched] = useState(false);
   const [inputMessage, setInputMessage] = useState("");
@@ -88,7 +91,7 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
       }, 5000);
       const welcomeMessage: Message = {
         id: Date.now().toString(),
-        text: `You are now connected with ${data.otherUser.name}! 👋`,
+        text: `You are now connected with ${data.otherUser.name}!`,
         sender: "other",
         timestamp: new Date(),
       };
@@ -242,13 +245,14 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 p-4 shadow-sm">
-        <div className="max-w-4xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg">
+        <div className="max-w-4xl mx-auto flex flex-col sm:flex-row items-start sm:items-center justify-between space-y-3 sm:space-y-0 w-full">
+          {/* Left Section */}
+          <div className="flex items-center space-x-3 w-full sm:w-auto">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shrink-0">
               <MessageSquare className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">
+            <div className="flex-1">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-800">
                 {config.APP_NAME} Text
               </h1>
               <div className="flex items-center space-x-2">
@@ -262,12 +266,13 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
             </div>
           </div>
 
-          <div className="flex space-x-2">
+          {/* Right Section */}
+          <div className="hidden sm:flex flex-wrap sm:flex-nowrap space-x-0 sm:space-x-2 space-y-2 sm:space-y-0 w-full sm:w-auto">
             <Button
               variant="outline"
               size="sm"
               onClick={onDisconnect}
-              className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 bg-transparent"
+              className="w-full sm:w-auto hover:bg-red-50 hover:text-red-600 hover:border-red-200 bg-transparent flex items-center justify-center"
             >
               {connectionStatus === "disconnected" ? (
                 <ArrowLeftIcon />
@@ -285,20 +290,68 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
               size="sm"
               onClick={handleFindNew}
               disabled={connectionStatus === "connecting"}
-              className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 bg-transparent"
+              className="w-full sm:w-auto hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 bg-transparent flex items-center justify-center"
             >
               <RotateCcw className="w-4 h-4 mr-1" />
               Find New
             </Button>
+          </div>
+
+          {/* Hamburger Menu for Mobile */}
+          <div className="sm:hidden w-full">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setDropdownOpen((prev) => !prev)}
+              className="w-full flex items-center justify-center bg-white hover:bg-gray-100 text-gray-700 border-gray-300"
+            >
+              <Menu className="w-4 h-4 mr-1" />
+              Options
+            </Button>
+
+            {dropdownOpen && (
+              <div className="mt-2 space-y-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onDisconnect}
+                  className="w-full hover:bg-red-50 hover:text-red-600 hover:border-red-200 bg-transparent flex items-center justify-center"
+                >
+                  {connectionStatus === "disconnected" ? (
+                    <ArrowLeftIcon className="w-4 h-4 mr-1" />
+                  ) : (
+                    <UserX className="w-4 h-4 mr-1" />
+                  )}
+                  {connectionStatus === "disconnected"
+                    ? "Back to Home"
+                    : connectionStatus === "connecting"
+                    ? "Cancel"
+                    : "Disconnect"}
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleFindNew}
+                  disabled={connectionStatus === "connecting"}
+                  className="w-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 bg-transparent flex items-center justify-center"
+                >
+                  <RotateCcw className="w-4 h-4 mr-1" />
+                  Find New
+                </Button>
+              </div>
+            )}
           </div>
         </div>
       </div>
 
       {/* Chat Area */}
       <div className="flex-1 max-w-4xl mx-auto w-full p-4 overflow-hidden flex flex-col">
-        <div className="flex-1 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 flex flex-col overflow-hidden">
+        <div
+          className="flex-1 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 flex flex-col overflow-hidden"
+          style={{ maxHeight: "80vh" }}
+        >
           {/* Messages */}
-          <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          <div className="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar">
             {connectionStatus === "connecting" ? (
               <div className="flex flex-col items-center justify-center h-full space-y-4">
                 <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-6 rounded-full animate-pulse">
@@ -386,9 +439,10 @@ const ChatInterface = ({ onDisconnect }: ChatInterfaceProps) => {
               <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-blue-500 to-purple-600"></div>
               <div className="flex space-x-2">
                 {emojiPickerVisible && (
-                  <div className="absolute bottom-14 left-0 z-50">
+                  <div className="absolute bottom-full left-0 z-50 w-[300px]">
                     <Picker
                       data={data}
+                      className="w-full"
                       onClickOutside={() => setEmojiPickerVisible(false)}
                       onEmojiSelect={addEmoji}
                     />

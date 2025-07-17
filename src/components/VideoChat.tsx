@@ -13,12 +13,18 @@ import {
   Send,
   Loader,
   ArrowLeftIcon,
+  Menu,
+  RotateCcw,
+  UserX,
+  SmileIcon,
 } from "lucide-react";
+import data from "@emoji-mart/data";
+import Picker from "@emoji-mart/react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useWebRTC } from "@/hooks/useWebRTC";
-import config from "@/config/config"
+import config from "@/config/config";
 
 interface VideoChatProps {
   onDisconnect: () => void;
@@ -38,6 +44,8 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
     useState<ConnectionStatus>("connecting");
 
   const [permissionError, setPermissionError] = useState<string | null>(null);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [emojiPickerVisible, setEmojiPickerVisible] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
@@ -48,6 +56,7 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
   } | null>(null);
   const [mediaInitialized, setMediaInitialized] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   const {
     localStream,
@@ -169,6 +178,13 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
     onDisconnect();
   };
 
+  const handleEmojiPicker = () => {
+    setEmojiPickerVisible(true);
+    if (emojiPickerVisible) {
+      inputRef.current?.focus();
+    }
+  };
+
   const handleFindNew = () => {
     if (socket) {
       socket.emit("find-new");
@@ -191,6 +207,11 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
     socket.emit("send-message", { text: inputMessage });
     setInputMessage("");
   };
+
+  function addEmoji(emoji: { native: string }) {
+    setInputMessage((prev) => prev + emoji.native);
+    setEmojiPickerVisible(false);
+  }
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -241,80 +262,154 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-indigo-50 to-purple-50 flex flex-col">
       {/* Header */}
       <div className="bg-white/80 backdrop-blur-sm border-b border-gray-200 p-4 shadow-sm">
-        <div className="max-w-6xl mx-auto flex items-center justify-between">
-          <div className="flex items-center space-x-3">
-            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg">
+        <div className="max-w-6xl mx-auto w-full flex flex-col sm:flex-row items-start md:items-center justify-between space-y-4 md:space-y-0">
+          {/* Left Section */}
+          <div className="flex items-start md:items-center space-x-3 w-full">
+            <div className="bg-gradient-to-r from-blue-500 to-purple-600 p-2 rounded-lg shrink-0">
               <Video className="w-6 h-6 text-white" />
             </div>
-            <div>
-              <h1 className="text-xl font-bold text-gray-800">
+            <div className="flex flex-col">
+              <h1 className="text-lg sm:text-xl font-bold text-gray-800">
                 {config.APP_NAME} Video
               </h1>
-              <p className="text-sm text-gray-600">
+              <div className="text-sm text-gray-600">
                 {isConnected ? (
                   `Video connected with ${otherUser?.name || "someone"}`
                 ) : isMatched ? (
                   <div className="flex items-center space-x-2">
                     <Loader className="w-4 h-4 animate-spin text-yellow-500" />
-                    <p className="">
+                    <span>
                       Setting up video call with{" "}
                       {`${otherUser?.name || "someone"}`}...
-                    </p>
+                    </span>
                   </div>
                 ) : (
-                  "Finding someone to video chat with..."
+                  "Finding someone to vibe with..."
                 )}
-              </p>
+              </div>
             </div>
           </div>
 
-          <div className="flex space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!isMatched}
-              onClick={() => setShowChat(!showChat)}
-              className={`hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 ${
-                showChat
-                  ? "bg-blue-50 text-blue-600 border-blue-200"
-                  : "bg-transparent"
-              }`}
-            >
-              <MessageSquare className="w-4 h-4 mr-1" />
-              Chat
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleDisconnect}
-              className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 bg-transparent"
-            >
-              {connectionStatus === "disconnected" ? (
-                <ArrowLeftIcon />
-              ) : (
-                <Phone className="w-4 h-4 mr-1" />
+          {/* Right Section */}
+          <div className="relative w-full md:w-auto">
+            <div className="sm:hidden w-full">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setDropdownOpen((prev) => !prev)}
+                className="w-full flex items-center justify-center bg-white hover:bg-gray-100 text-gray-700 border-gray-300"
+              >
+                <Menu className="w-4 h-4 mr-1" />
+                Options
+              </Button>
+
+              {dropdownOpen && (
+                <div className="mt-2 space-y-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!isMatched}
+                    onClick={() => {
+                      setShowChat(!showChat);
+                      setDropdownOpen(false);
+                    }}
+                    className={`w-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 ${
+                      showChat
+                        ? "bg-blue-50 text-blue-600 border-blue-200"
+                        : "bg-transparent"
+                    }`}
+                  >
+                    <MessageSquare className="w-4 h-4 mr-1" />
+                    Chat
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => {
+                      handleDisconnect();
+                      setDropdownOpen(false);
+                    }}
+                    className="w-full hover:bg-red-50 hover:text-red-600 hover:border-red-200 bg-transparent"
+                  >
+                    {connectionStatus === "disconnected" ? (
+                      <ArrowLeftIcon className="w-4 h-4 mr-1" />
+                    ) : (
+                      <Phone className="w-4 h-4 mr-1" />
+                    )}
+                    {connectionStatus === "disconnected"
+                      ? "Back to Home"
+                      : connectionStatus === "connecting"
+                      ? "Cancel"
+                      : "Disconnect"}
+                  </Button>
+
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled={!isMatched}
+                    onClick={() => {
+                      handleFindNew();
+                      setDropdownOpen(false);
+                    }}
+                    className="w-full hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 bg-transparent"
+                  >
+                    Find New
+                  </Button>
+                </div>
               )}
-              {connectionStatus === "disconnected"
-                ? "Back to Home"
-                : connectionStatus === "connecting"
-                ? "Cancel"
-                : "Disconnect"}
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              disabled={!isMatched}
-              onClick={handleFindNew}
-              className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 bg-transparent"
-            >
-              Find New
-            </Button>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-2">
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!isMatched}
+                onClick={() => setShowChat(!showChat)}
+                className={`hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 ${
+                  showChat
+                    ? "bg-blue-50 text-blue-600 border-blue-200"
+                    : "bg-transparent"
+                }`}
+              >
+                <MessageSquare className="w-4 h-4 mr-1" />
+                Chat
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleDisconnect}
+                className="hover:bg-red-50 hover:text-red-600 hover:border-red-200 bg-transparent"
+              >
+                {connectionStatus === "disconnected" ? (
+                  <ArrowLeftIcon className="w-4 h-4 mr-1" />
+                ) : (
+                  <Phone className="w-4 h-4 mr-1" />
+                )}
+                {connectionStatus === "disconnected"
+                  ? "Back to Home"
+                  : connectionStatus === "connecting"
+                  ? "Cancel"
+                  : "Disconnect"}
+              </Button>
+
+              <Button
+                variant="outline"
+                size="sm"
+                disabled={!isMatched}
+                onClick={handleFindNew}
+                className="hover:bg-blue-50 hover:text-blue-600 hover:border-blue-200 bg-transparent"
+              >
+                Find New
+              </Button>
+            </div>
           </div>
         </div>
       </div>
 
       {/* Video and Chat Area */}
-      <div className="flex-1 p-4 flex gap-4">
+      <div className="flex-1 p-4 flex flex-col md:flex-row gap-4">
         <div className="flex-1 flex flex-col items-center justify-center space-y-4">
           {/* Remote Video */}
           <div className="w-full max-w-2xl">
@@ -433,7 +528,7 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
 
         {/* Chat Sidebar */}
         {showChat && (
-          <div className="w-96 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 flex flex-col overflow-hidden">
+          <div className="w-full md:w-96 bg-white/70 backdrop-blur-sm rounded-2xl shadow-xl border border-white/20 flex flex-col overflow-hidden max-h-[80vh]">
             <div className="bg-gradient-to-r from-blue-500 to-purple-600 text-white p-4">
               <h3 className="font-semibold flex items-center">
                 <MessageSquare className="w-5 h-5 mr-2" />
@@ -442,7 +537,7 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
             </div>
 
             {/* Messages */}
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+            <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar max-h-[50vh] md:max-h-[60vh]">
               {messages.length === 0 ? (
                 <div className="text-center text-gray-500 mt-8">
                   <MessageSquare className="w-12 h-12 mx-auto mb-2 opacity-50" />
@@ -503,9 +598,30 @@ const VideoChat = ({ onDisconnect }: VideoChatProps) => {
             </div>
 
             {/* Input Area */}
-            <div className="border-t border-gray-200 p-4">
+            <div className="border-t border-gray-200 p-4 relative">
+            <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-blue-500 to-purple-600"></div>
               <div className="flex space-x-2">
+              {emojiPickerVisible && (
+                  <div className="absolute bottom-full left-0 z-50 w-[300px]">
+                    <Picker
+                      data={data}
+                      className="w-full"
+                      onClickOutside={() => setEmojiPickerVisible(false)}
+                      onEmojiSelect={addEmoji}
+                    />
+                  </div>
+                )}
+                <Button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    handleEmojiPicker();
+                  }}
+                  className="bg-white text-gray-600 shadow-md hover:bg-gray-100 px-4 rounded-xl"
+                >
+                  <SmileIcon size={5} className="w-4 h-4" />
+                </Button>
                 <Input
+                ref={inputRef}
                   value={inputMessage}
                   onChange={handleInputChange}
                   onKeyPress={handleKeyPress}

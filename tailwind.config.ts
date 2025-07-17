@@ -19,6 +19,17 @@ export default {
 			}
 		},
 		extend: {
+			screens:{
+				'2xs': '350px',
+				xs: '480px',
+				sm: '640px',
+				md: '768px',
+				lg: '1024px',
+				xl: '1280px',
+				'2xl': '1400px',
+				'3xl': '1600px',
+				'4xl': '1800px'
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
