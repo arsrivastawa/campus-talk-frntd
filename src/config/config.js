@@ -1,5 +1,5 @@
 const config = {
-  SERVER_URL: "https://campus-talk-bcknd.onrender.com",
+  SERVER_URL: "https://randomizeserver.centralindia.cloudapp.azure.com",
   APP_NAME: "Randomize",
 };
 
