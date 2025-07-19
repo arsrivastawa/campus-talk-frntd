@@ -1,5 +1,5 @@
 const config = {
-  SERVER_URL: "https://randomizeserver.centralindia.cloudapp.azure.com",
+  SERVER_URL: "http://randomize.centralindia.cloudapp.azure.com:3001",
   APP_NAME: "Randomize",
 };
 
