@@ -4,5 +4,6 @@ const config = {
 };
 
 // https://campus-talk-bcknd.onrender.com
+// https://randomize.centralindia.cloudapp.azure.com
 // http://localhost:3001
 export default config;
